@@ -4,7 +4,6 @@ import numpy as np
 import sklearn
 import streamlit as st
 import joblib
-import shap
 import matplotlib
 from IPython import get_ipython
 from PIL import Image
@@ -54,7 +53,7 @@ def main():
     with st.form("Prediction form"):
         st.subheader("Please enter the following inputs:")
         gender = st.selectbox("Gender", options=options_gender)
-        SeniorCitizen = st.selectbox("Senior Citizen", options = options_senior)
+        SeniorCitizen = st.selectbox("SeniorCitizen", options = options_senior)
         Partner = st.selectbox("Partner", options = options_partner)
         Dependents = st.selectbox("Dependants", options = options_dependants)
         tenure = st.number_input("Tenure")
@@ -62,7 +61,7 @@ def main():
         MultipleLines = st.selectbox("MultipleLines", options = options_multiplelines)
         InternetService = st.selectbox("InternetService", options = options_internet)
         OnlineSecurity = st.selectbox("OnlineSecurity", options = options_onlinesecurity)
-        OnlineBackup = st.selectbox("OnlineBackup", options = options_options_backup)
+        OnlineBackup = st.selectbox("OnlineBackup", options = options_backup)
         DeviceProtection = st.selectbox("DeviceProtection", options = options_deviceprotection)
         TechSupport = st.selectbox("TechSupport", options = options_techsupport)
         StreamingTV = st.selectbox("StreamingTV", options = options_streamingtv)
@@ -80,12 +79,24 @@ def main():
         input_array2 = np.array([PhoneService, MultipleLines, InternetService, OnlineSecurity, OnlineBackup,
                                  DeviceProtection, TechSupport, StreamingTV, StreamingMovies, Contract, PaperlessBilling,
                                  PaymentMethod])
-        encoded_arr1 = list(encoder.transform(input_array1).ravel())
-        encoded_arr2 = list(encoder.transform(input_array2).ravel())
-        num_arr1= [tenure]
+        #encoded_arr1 = list(encoder.transform(input_array1).ravel())
+        #encoded_arr2 = list(encoder.transform(input_array2).ravel())
+        input_array = np.array([gender, Partner, Dependents, PhoneService, MultipleLines,
+                                 InternetService, OnlineSecurity, OnlineBackup,
+                                 DeviceProtection, TechSupport, StreamingTV, StreamingMovies, Contract, PaperlessBilling,
+                                PaymentMethod], ndmin = 2)
+
+        #for i in input_array:
+        encoded_arr = list(encoder.transform(input_array).ravel())
+        if SeniorCitizen == 'Yes':
+            senior = 1
+        else:
+            senior = 0
+        num_arr1= [tenure, senior]
         num_arr2 = [MonthlyCharges, TotalCharges]
-        pred_arr = np.array(encoded_arr1 + num_arr1 + encoded_arr2 + num_arr2).reshape(1,-1)
-        
+        #pred_arr = np.array(encoded_arr1 + num_arr1 + encoded_arr2 + num_arr2).reshape(1,-1)
+        pred_arr = np.array(encoded_arr + num_arr1 + num_arr2).reshape(1,-1)
+
         # predict the target from all the input features
         prediction = model.predict(pred_arr)
             
@@ -94,3 +105,7 @@ def main():
         else:
             st.write(f"The Customer will Churn immediately")
             
+
+# run the main function               
+if __name__ == '__main__':
+   main()
